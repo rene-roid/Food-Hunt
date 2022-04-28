@@ -105,4 +105,9 @@ public class BouncingArrow : BulletController
         return null;
     }
     #endregion
+
+    private void OnBecameInvisible()
+    {
+        Destroy(gameObject);
+    }
 }

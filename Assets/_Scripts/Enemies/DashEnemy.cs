@@ -8,6 +8,7 @@ public class DashEnemy : EnemyController
     [SerializeField] private float _moveSpeed;
 
     [SerializeField] private float _dashRange = 3f;
+    [SerializeField] private LineRenderer _dashEffect;
 
     [Header("Debuffs")]
     [SerializeField] [Range(0, 1f)] private float _speedReduction = 1;
@@ -27,7 +28,7 @@ public class DashEnemy : EnemyController
         if (!IsActive) return;
         DebuffCalculator();
         //Move();
-        
+
     }
 
     private void FixedUpdate()
@@ -51,8 +52,12 @@ public class DashEnemy : EnemyController
         if (!_inDash)
         {
             // Follow the player until it reaches the range
-            if (Vector3.Distance(transform.position, Target.position) > _dashRange && !_inRange)
+            if (Vector3.Distance(transform.position, Target.position) > _dashRange / 2 && !_inRange)
             {
+                // Reset lookat
+                transform.rotation = Quaternion.Euler(0, 0, 0);
+                Animator.Play("move");
+
                 Rb.MovePosition(Vector3.MoveTowards(transform.position, Target.position, _moveSpeed * Time.deltaTime));
             } else
             {
@@ -62,7 +67,14 @@ public class DashEnemy : EnemyController
                 if (!_inRange)
                 {
                     GetDashDirection();
+                    
+                    _dashEffect.SetPosition(0, transform.position);
+                    _dashEffect.SetPosition(1, transform.position);
+
                     _inRange = true;
+                } else
+                {
+                    _dashEffect.SetPosition(1, Vector3.Lerp(_dashEffect.GetPosition(1), _dashDirection, LerpTwoNumbersInSpecifiedTime(0, 1, 0.1f)));
                 }
 
                 // Start dash
@@ -78,17 +90,34 @@ public class DashEnemy : EnemyController
                 _inRange = false;
                 _inDash = false;
                 
+                Rb.isKinematic = false;
+                Rb.bodyType = RigidbodyType2D.Dynamic;
+
+                Rb.velocity = Vector3.zero;
+
+                _dashEffect.SetPosition(0, transform.position);
+                _dashEffect.SetPosition(1, transform.position);
             } // Check if the gameobject position is near _dashDirection
-            else if (Vector3.Distance(transform.position, _dashDirection) < 0.2f)
+            else if (Vector3.Distance(transform.position, _dashDirection) < 1f)
             {
                 
                 _inRange = false;
                 _inDash = false;
+                
+                Rb.isKinematic = false;
+                Rb.bodyType = RigidbodyType2D.Dynamic;
+                
+                Rb.velocity = Vector3.zero;
+
+                _dashEffect.SetPosition(0, transform.position);
+                _dashEffect.SetPosition(1, transform.position);
             }
             else
             {
                 // Move gameobject to _dashDirection
                 Rb.MovePosition(Vector3.MoveTowards(transform.position, _dashDirection, _moveSpeed * 10 * Time.deltaTime));
+
+                _dashEffect.SetPosition(0, transform.position);
             }
         }
     }
@@ -98,8 +127,16 @@ public class DashEnemy : EnemyController
         // Wait
         yield return new WaitForSeconds(.5f);
 
+
         // Activate dash mode
+        Animator.Play("attack");
+
+        // Look towards the _dashDirection in the z rotation
+        transform.rotation = Quaternion.Euler(0, 0, Mathf.Atan2(_dashDirection.y - transform.position.y, _dashDirection.x - transform.position.x) * Mathf.Rad2Deg);
+
         _inDash = true;
+        Rb.bodyType = RigidbodyType2D.Kinematic;
+        Rb.isKinematic = true;
         // Move gameobject to _dashDirection
     }
 
@@ -107,8 +144,21 @@ public class DashEnemy : EnemyController
     {
         var dir = Target.position - transform.position;
         var dist = Vector3.Distance(transform.position, Target.position);
-        _dashDirection = dir.normalized * (dist * 2) + transform.position;
+        _dashDirection = dir.normalized * (dist + _dashRange) + transform.position;
     }
 
     #endregion
+
+
+    private float LerpTwoNumbersInSpecifiedTime(float start, float end, float time)
+    {
+        float t = 0;
+        while (t < 1)
+        {
+            t += Time.deltaTime / time;
+            return Mathf.Lerp(start, end, t);
+        }
+        return 1;
+    }
+
 }

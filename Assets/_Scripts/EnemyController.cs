@@ -47,7 +47,7 @@ public class EnemyController : MonoBehaviour
 
     private void LateUpdate()
     {
-        
+        FlipSprite();
     }
 
     public virtual void Knockback()
@@ -98,5 +98,24 @@ public class EnemyController : MonoBehaviour
     public virtual void Die()
     {
         Destroy(this.gameObject);
+    }
+
+    // Lerp number from 0 to 1 with the time specified
+    public float LerpNumber(float time)
+    {
+        return Mathf.Lerp(0, 1, time);
+    }
+
+    // Flip sprite if looking at the other direction
+    public void FlipSprite()
+    {
+        if (transform.position.x < Target.position.x)
+        {
+            transform.localScale = new Vector3(-1, 1, 1);
+        }
+        else
+        {
+            transform.localScale = new Vector3(1, 1, 1);
+        }
     }
 }

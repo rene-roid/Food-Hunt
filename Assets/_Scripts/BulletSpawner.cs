@@ -32,12 +32,10 @@ public class BulletSpawner : MonoBehaviour
     private void SpawnBasicBullet()
     {
         GameObject newBasicBullet = Instantiate(_basicBullet, transform.position, Quaternion.identity);
-        print("Spawned");
     }
     
     private void SpawnMeteor()
     {
         GameObject newMeteor = Instantiate(_meteor, transform.position, Quaternion.identity);
-        print("Spawned");
     }
 }
