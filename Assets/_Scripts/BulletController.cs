@@ -10,12 +10,12 @@ public class BulletController : MonoBehaviour
     public float Thrust = 5;
 
     [Header("Components")]
-    [SerializeField] private Transform _playerRb;
+    [SerializeField] private Transform _playerTransform;
 
 
     private void Awake()
     {
-        _playerRb = FindObjectOfType<PlayerController>().transform;
+        _playerTransform = FindObjectOfType<PlayerController>().transform;
         
     }
 

@@ -146,7 +146,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Damage: 1
   Thrust: 5
-  _playerRb: {fileID: 0}
+  _playerTransform: {fileID: 0}
+  type: 0
   _bulletSpeed: 20
   _latestEnemy: []
   _nearestEnemy: {fileID: 0}

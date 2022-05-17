@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class BouncingArrow : BulletController
 {
+    private enum BulletType { EnemyBounce, ScreenBounce };
+    [SerializeField] private BulletType type;
+
     [Header("Stats")]
     [SerializeField] private float _bulletSpeed = 5;
 
@@ -58,7 +61,17 @@ public class BouncingArrow : BulletController
     #region Movement
     private void MoveBullet()
     {
-        _rb.MovePosition(BulletFollow());
+        switch (type)
+        {
+            case BulletType.EnemyBounce:
+                _rb.MovePosition(BulletFollow());
+                break;
+            case BulletType.ScreenBounce:
+                _rb.MovePosition(CameraBounce());
+                break;
+            default:
+                break;
+        }
     }
 
     private Vector2 BulletFollow()
@@ -109,5 +122,34 @@ public class BouncingArrow : BulletController
     private void OnBecameInvisible()
     {
         Destroy(gameObject);
+    }
+
+    // Move the bullet to a random direction and bounce it when it reaches the camera border
+    private Vector2 CameraBounce()
+    {
+        Vector2 newPosition = transform.position;
+        newPosition.x += _bulletSpeed * Time.deltaTime;
+        if (newPosition.x > Camera.main.orthographicSize * Camera.main.aspect)
+        {
+            newPosition.x = -Camera.main.orthographicSize * Camera.main.aspect;
+            _bulletDirection.x *= -1;
+        }
+        else if (newPosition.x < -Camera.main.orthographicSize * Camera.main.aspect)
+        {
+            newPosition.x = Camera.main.orthographicSize * Camera.main.aspect;
+            _bulletDirection.x *= -1;
+        }
+        newPosition.y += _bulletSpeed * Time.deltaTime;
+        if (newPosition.y > Camera.main.orthographicSize)
+        {
+            newPosition.y = -Camera.main.orthographicSize;
+            _bulletDirection.y *= -1;
+        }
+        else if (newPosition.y < -Camera.main.orthographicSize)
+        {
+            newPosition.y = Camera.main.orthographicSize;
+            _bulletDirection.y *= -1;
+        }
+        return newPosition;
     }
 }
